@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiAutores.Entidades;
+using Microsoft.Extensions.Configuration;
 
 namespace WebApiAutores.Controllers
 {
@@ -9,10 +10,21 @@ namespace WebApiAutores.Controllers
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context; // Ahora es accesible desde cualquier parte de esta clase
-        public AutoresController(ApplicationDbContext context)
+        private readonly IConfiguration configuration;
+
+        public AutoresController(ApplicationDbContext context, IConfiguration configuration)
         {
             this.context = context;
+            this.configuration = configuration;
         }
+
+        [HttpGet("configuraciones")]
+        public ActionResult<string> ObtenerConfiguracion()
+        {
+            return configuration["apellido"];
+            //return configuration["ConnectionStrings:defaultConnection"];
+        }
+
 
 
         [HttpGet]   // api/Autores
