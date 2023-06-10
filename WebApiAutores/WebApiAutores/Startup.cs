@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Text.Json.Serialization;
+using WebApiAutores.Controllers;
+using WebApiAutores.Servicios;
 
 namespace WebApiAutores
 {
@@ -12,6 +14,11 @@ namespace WebApiAutores
     {
         public Startup(IConfiguration configuration)
         {
+            // Se puede usar el ServicioA o ServicioB u otro implementado en la interfaz en el futuro.
+            //var autoresController = new AutoresController(new ApplicationDbContext(null), null, new ServicioA());
+            
+            //autoresController.Get();
+
             Configuration = configuration;
         }
 
@@ -23,6 +30,14 @@ namespace WebApiAutores
             // Inyección de dependencias...
             services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
+
+            // Resolver dependencias
+            // Se dice que cuando una clase requiera un IServicio entonces pasale un ServicioA
+            // Con eso se instancian las dependencias de las dependencias de las clases
+            services.AddTransient<IServicio, ServicioB>();
+
+            // O solo una clase (Clase como servicio)
+            //services.AddTransient<ServicioA>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();

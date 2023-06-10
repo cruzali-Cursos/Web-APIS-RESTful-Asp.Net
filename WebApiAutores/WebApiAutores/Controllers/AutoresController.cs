@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebApiAutores.Entidades;
 using Microsoft.Extensions.Configuration;
+using WebApiAutores.Servicios;
 
 namespace WebApiAutores.Controllers
 {
@@ -11,11 +12,15 @@ namespace WebApiAutores.Controllers
     {
         private readonly ApplicationDbContext context; // Ahora es accesible desde cualquier parte de esta clase
         private readonly IConfiguration configuration;
+        private readonly IServicio servicio;
 
-        public AutoresController(ApplicationDbContext context, IConfiguration configuration)
+        // IServicio es una dependencia de la clase
+        // Se dice que IServicio se inyecta a travéz del constructor de la clase.
+        public AutoresController(ApplicationDbContext context, IConfiguration configuration, IServicio servicio)
         {
             this.context = context;
             this.configuration = configuration;
+            this.servicio = servicio;
         }
 
         [HttpGet("configuraciones")]
@@ -32,11 +37,12 @@ namespace WebApiAutores.Controllers
         [HttpGet("/listado")] // listado
         public async Task<List<Autor>> Get()
         {
+            servicio.RealizarTarea();
             return await context.Autores.Include(x => x.Libros).ToListAsync();
         }
 
-        [HttpGet("primero")]  // api/autores/primero
-        public async Task<ActionResult<Autor>> PrimerAutor()
+        [HttpGet("primero")]  // api/autores/primero?nombre=Ali&apellido=Cruz
+        public async Task<ActionResult<Autor>> PrimerAutor([FromHeader] int miValor, [FromQuery] string nombre)
         {
             return await context.Autores.FirstOrDefaultAsync();
         }
@@ -84,6 +90,13 @@ namespace WebApiAutores.Controllers
         [HttpPost]
         public async Task<ActionResult> Post(Autor autor)
         {
+            var existeAutorConElMismoNombre = await context.Autores.AnyAsync(x => x.Nombre == autor.Nombre);
+
+            if (existeAutorConElMismoNombre)
+            {
+                return BadRequest($"Ya existe un autor con el nombre {autor.Nombre}");
+            }
+
             context.Add(autor);
             await context.SaveChangesAsync();
             return Ok();
