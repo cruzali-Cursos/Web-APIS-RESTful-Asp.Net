@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -41,7 +42,9 @@ namespace WebApiAutores
             services.AddScoped<ServicioScoped>();
             services.AddSingleton<ServicioSingleton>();
 
+            services.AddResponseCaching();
 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 
             // O solo una clase (Clase como servicio)
             //services.AddTransient<ServicioA>();
@@ -81,6 +84,7 @@ namespace WebApiAutores
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            // El orden de los middlewares es muy importante.
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

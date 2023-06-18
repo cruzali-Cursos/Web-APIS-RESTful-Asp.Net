@@ -3,11 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using WebApiAutores.Entidades;
 using Microsoft.Extensions.Configuration;
 using WebApiAutores.Servicios;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApiAutores.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]  // Ruta Base, ruta del controlador
+    [Authorize]
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context; // Ahora es accesible desde cualquier parte de esta clase
@@ -46,6 +48,7 @@ namespace WebApiAutores.Controllers
 
 
         [HttpGet("GUID")]
+        [ResponseCache(Duration = 10)]
         public ActionResult ObtenerGuids()
         {
             return Ok(new
@@ -63,6 +66,8 @@ namespace WebApiAutores.Controllers
         [HttpGet]   // api/Autores
         [HttpGet("listado")] // api/Autores/listado
         [HttpGet("/listado")] // listado
+        [ResponseCache(Duration =10)]
+        //[Authorize]
         public async Task<List<Autor>> Get()
         {
             logger.LogInformation("Estamos obteniendo los autores.");
