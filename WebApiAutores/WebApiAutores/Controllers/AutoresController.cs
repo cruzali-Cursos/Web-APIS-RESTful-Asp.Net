@@ -4,12 +4,13 @@ using WebApiAutores.Entidades;
 using Microsoft.Extensions.Configuration;
 using WebApiAutores.Servicios;
 using Microsoft.AspNetCore.Authorization;
+using WebApiAutores.Filtros;
 
 namespace WebApiAutores.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]  // Ruta Base, ruta del controlador
-    [Authorize]
+    //[Authorize]
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context; // Ahora es accesible desde cualquier parte de esta clase
@@ -48,7 +49,8 @@ namespace WebApiAutores.Controllers
 
 
         [HttpGet("GUID")]
-        [ResponseCache(Duration = 10)]
+        //[ResponseCache(Duration = 10)]
+        [ServiceFilter(typeof(MiFiltroDeAccion))]
         public ActionResult ObtenerGuids()
         {
             return Ok(new
@@ -66,10 +68,12 @@ namespace WebApiAutores.Controllers
         [HttpGet]   // api/Autores
         [HttpGet("listado")] // api/Autores/listado
         [HttpGet("/listado")] // listado
-        [ResponseCache(Duration =10)]
+        //[ResponseCache(Duration =10)]
+        [ServiceFilter(typeof(MiFiltroDeAccion))]
         //[Authorize]
         public async Task<List<Autor>> Get()
         {
+            throw new NotImplementedException();
             logger.LogInformation("Estamos obteniendo los autores.");
             logger.LogWarning("Este es un mensaje Warning");
             servicio.RealizarTarea();
