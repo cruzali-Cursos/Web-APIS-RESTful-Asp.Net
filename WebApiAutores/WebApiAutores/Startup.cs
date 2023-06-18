@@ -49,6 +49,7 @@ namespace WebApiAutores
 
             // Mi filtro de acción
             services.AddTransient<MiFiltroDeAccion>();
+            services.AddHostedService<EscribirEnArchivo>();
 
             services.AddResponseCaching();
 
