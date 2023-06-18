@@ -13,14 +13,28 @@ namespace WebApiAutores.Controllers
         private readonly ApplicationDbContext context; // Ahora es accesible desde cualquier parte de esta clase
         private readonly IConfiguration configuration;
         private readonly IServicio servicio;
+        private readonly ServicioTransient servicioTransient;
+        private readonly ServicioScoped servicioScoped;
+        private readonly ServicioSingleton servicioSingleton;
+        private readonly ILogger<AutoresController> logger;
+
+        public ServicioTransient ServicioTransient { get; }
+        public ServicioScoped ServicioScoped { get; }
+        public ServicioSingleton ServicioSingleton { get; }
 
         // IServicio es una dependencia de la clase
         // Se dice que IServicio se inyecta a travéz del constructor de la clase.
-        public AutoresController(ApplicationDbContext context, IConfiguration configuration, IServicio servicio)
+        public AutoresController(ApplicationDbContext context, IConfiguration configuration, IServicio servicio,
+                    ServicioTransient servicioTransient, ServicioScoped servicioScoped, ServicioSingleton servicioSingleton,
+                    ILogger<AutoresController> logger)
         {
             this.context = context;
             this.configuration = configuration;
             this.servicio = servicio;
+            this.servicioTransient = servicioTransient;
+            this.servicioScoped = servicioScoped;
+            this.servicioSingleton = servicioSingleton;
+            this.logger = logger;
         }
 
         [HttpGet("configuraciones")]
@@ -31,12 +45,28 @@ namespace WebApiAutores.Controllers
         }
 
 
+        [HttpGet("GUID")]
+        public ActionResult ObtenerGuids()
+        {
+            return Ok(new
+            {
+                AutoresController_Transient = servicioTransient.Guid,
+                ServicioA_Transient = servicio.ObtenerTransient(),
+                AutoresController_Scoped = servicioScoped.Guid,
+                ServicioA_Scoped = servicio.ObtenerScoped(),
+                AutoresController_Singleton = servicioSingleton.Guid,
+                ServicioA_Singleton = servicio.ObtenerSingleton()
+            });
+        }
+
 
         [HttpGet]   // api/Autores
         [HttpGet("listado")] // api/Autores/listado
         [HttpGet("/listado")] // listado
         public async Task<List<Autor>> Get()
         {
+            logger.LogInformation("Estamos obteniendo los autores.");
+            logger.LogWarning("Este es un mensaje Warning");
             servicio.RealizarTarea();
             return await context.Autores.Include(x => x.Libros).ToListAsync();
         }

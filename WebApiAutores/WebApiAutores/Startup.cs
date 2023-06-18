@@ -34,7 +34,13 @@ namespace WebApiAutores
             // Resolver dependencias
             // Se dice que cuando una clase requiera un IServicio entonces pasale un ServicioA
             // Con eso se instancian las dependencias de las dependencias de las clases
-            services.AddTransient<IServicio, ServicioB>();
+            services.AddTransient<IServicio, ServicioA>();
+
+            services.AddTransient<ServicioTransient>();
+            services.AddScoped<ServicioScoped>();
+            services.AddSingleton<ServicioSingleton>();
+
+
 
             // O solo una clase (Clase como servicio)
             //services.AddTransient<ServicioA>();
