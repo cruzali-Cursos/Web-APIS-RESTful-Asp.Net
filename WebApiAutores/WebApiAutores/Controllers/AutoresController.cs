@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebApiAutores.Entidades;
 using Microsoft.Extensions.Configuration;
-using WebApiAutores.Servicios;
+
 using Microsoft.AspNetCore.Authorization;
 using WebApiAutores.Filtros;
 
@@ -10,95 +10,31 @@ namespace WebApiAutores.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]  // Ruta Base, ruta del controlador
-    //[Authorize]
+    
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context; // Ahora es accesible desde cualquier parte de esta clase
-        private readonly IConfiguration configuration;
-        private readonly IServicio servicio;
-        private readonly ServicioTransient servicioTransient;
-        private readonly ServicioScoped servicioScoped;
-        private readonly ServicioSingleton servicioSingleton;
-        private readonly ILogger<AutoresController> logger;
-
-        public ServicioTransient ServicioTransient { get; }
-        public ServicioScoped ServicioScoped { get; }
-        public ServicioSingleton ServicioSingleton { get; }
 
         // IServicio es una dependencia de la clase
         // Se dice que IServicio se inyecta a travéz del constructor de la clase.
-        public AutoresController(ApplicationDbContext context, IConfiguration configuration, IServicio servicio,
-                    ServicioTransient servicioTransient, ServicioScoped servicioScoped, ServicioSingleton servicioSingleton,
-                    ILogger<AutoresController> logger)
+        public AutoresController(ApplicationDbContext context)
         {
             this.context = context;
-            this.configuration = configuration;
-            this.servicio = servicio;
-            this.servicioTransient = servicioTransient;
-            this.servicioScoped = servicioScoped;
-            this.servicioSingleton = servicioSingleton;
-            this.logger = logger;
-        }
-
-        [HttpGet("configuraciones")]
-        public ActionResult<string> ObtenerConfiguracion()
-        {
-            return configuration["apellido"];
-            //return configuration["ConnectionStrings:defaultConnection"];
-        }
-
-
-        [HttpGet("GUID")]
-        //[ResponseCache(Duration = 10)]
-        [ServiceFilter(typeof(MiFiltroDeAccion))]
-        public ActionResult ObtenerGuids()
-        {
-            return Ok(new
-            {
-                AutoresController_Transient = servicioTransient.Guid,
-                ServicioA_Transient = servicio.ObtenerTransient(),
-                AutoresController_Scoped = servicioScoped.Guid,
-                ServicioA_Scoped = servicio.ObtenerScoped(),
-                AutoresController_Singleton = servicioSingleton.Guid,
-                ServicioA_Singleton = servicio.ObtenerSingleton()
-            });
         }
 
 
         [HttpGet]   // api/Autores
-        [HttpGet("listado")] // api/Autores/listado
-        [HttpGet("/listado")] // listado
-        //[ResponseCache(Duration =10)]
-        [ServiceFilter(typeof(MiFiltroDeAccion))]
         //[Authorize]
         public async Task<List<Autor>> Get()
         {
-            throw new NotImplementedException();
-            logger.LogInformation("Estamos obteniendo los autores.");
-            logger.LogWarning("Este es un mensaje Warning");
-            servicio.RealizarTarea();
-            return await context.Autores.Include(x => x.Libros).ToListAsync();
+            return await context.Autores.ToListAsync();
         }
-
-        [HttpGet("primero")]  // api/autores/primero?nombre=Ali&apellido=Cruz
-        public async Task<ActionResult<Autor>> PrimerAutor([FromHeader] int miValor, [FromQuery] string nombre)
-        {
-            return await context.Autores.FirstOrDefaultAsync();
-        }
-
-
-        [HttpGet("primero2")]  // api/autores/primero
-        public ActionResult<Autor> PrimerAutor2()
-        {
-            return new Autor() { Nombre = "Ali" }; // Desde memoria.
-        }
-
 
         // Se vuelve una plantilla, ya que primero pide un entero diagonal un parametro string.
         // Se vuelve opcional si se le agrega el signo ?
         //[HttpGet("{id:int}/{param2?}")] // Variable de ruta opcional.
-        [HttpGet("{id:int}/{param2=valorPorDefecto}")] // Variable de ruta con valor por defecto.
-        public async Task<ActionResult<Autor>> Get(int id, string param2)
+        [HttpGet("{id:int}")] // Variable de ruta con valor por defecto.
+        public async Task<ActionResult<Autor>> Get(int id)
         {
             var autor = await context.Autores.FirstOrDefaultAsync(x => x.Id == id);
 

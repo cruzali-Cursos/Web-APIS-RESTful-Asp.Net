@@ -9,7 +9,6 @@ using System.Text.Json.Serialization;
 using WebApiAutores.Controllers;
 using WebApiAutores.Filtros;
 using WebApiAutores.Middlewares;
-using WebApiAutores.Servicios;
 
 namespace WebApiAutores
 {
@@ -38,20 +37,6 @@ namespace WebApiAutores
             services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
 
-            // Resolver dependencias
-            // Se dice que cuando una clase requiera un IServicio entonces pasale un ServicioA
-            // Con eso se instancian las dependencias de las dependencias de las clases
-            services.AddTransient<IServicio, ServicioA>();
-
-            services.AddTransient<ServicioTransient>();
-            services.AddScoped<ServicioScoped>();
-            services.AddSingleton<ServicioSingleton>();
-
-            // Mi filtro de acción
-            services.AddTransient<MiFiltroDeAccion>();
-            services.AddHostedService<EscribirEnArchivo>();
-
-            services.AddResponseCaching();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 
@@ -70,18 +55,7 @@ namespace WebApiAutores
             
             // No exponemos la clase
             app.UseLoguearRespuestaHTTP();
-
-            // Condicionar a ruta específica
-            app.Map("/ruta1", app =>
-            {
-                app.Run(async contexto =>
-                {
-                    await contexto.Response.WriteAsJsonAsync("Estoy interceptando la tubería.");
-                });
-            });
-
-
-
+  
             if (env.IsDevelopment())
             {
                 // Estos son middlewares (dicen use)
